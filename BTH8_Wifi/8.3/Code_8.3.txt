@@ -1,0 +1,106 @@
+# ESP32-S3 DevKitC-1 — minhtuan
+# Nhiet do va do am gia lap, khong can cam bien vat ly.
+esphome:
+  name: minhtuan
+  friendly_name: minhtuan
+  on_boot:
+    priority: -10
+    then:
+      - light.turn_on:
+          id: status_led
+          effect: "Blink Fast"
+
+esp32:
+  variant: esp32s3
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: "9px2YVWjuEIfV0L62w9dLiEZIpRKqiHHClj3m9DNi6Y="
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: "Thân chưa mà xin"
+  password: "modicungg"
+  ap:
+    ssid: "minhtuan Fallback Hotspot"
+    password: "FqfiyfASNlNz"
+
+captive_portal:
+
+web_server:
+  port: 80
+
+light:
+  - platform: esp32_rmt_led_strip
+    name: "minhtuan"
+    id: status_led
+    pin: GPIO48
+    num_leds: 1
+    chipset: ws2812
+    rgb_order: GRB
+    effects:
+      - strobe:
+          name: "Blink Fast"
+          colors:
+            - state: true
+              brightness: 100%
+              red: 0%
+              green: 100%
+              blue: 0%
+              duration: 500ms
+            - state: false
+              duration: 500ms
+
+sensor:
+  - platform: template
+    name: "Nhiet do"
+    id: nhiet_do_ao
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    update_interval: 5s
+    lambda: |-
+      static float temperature = 28.0f;
+      static float step = 0.2f;
+
+      temperature += step;
+      if (temperature >= 32.0f) {
+        temperature = 32.0f;
+        step = -0.2f;
+      } else if (temperature <= 26.0f) {
+        temperature = 26.0f;
+        step = 0.2f;
+      }
+
+      return temperature;
+
+  - platform: template
+    name: "Do am"
+    id: do_am_ao
+    device_class: humidity
+    state_class: measurement
+    unit_of_measurement: "%"
+    accuracy_decimals: 1
+    update_interval: 5s
+    lambda: |-
+      static float humidity = 65.0f;
+      static float step = 0.5f;
+
+      humidity += step;
+      if (humidity >= 80.0f) {
+        humidity = 80.0f;
+        step = -0.5f;
+      } else if (humidity <= 55.0f) {
+        humidity = 55.0f;
+        step = 0.5f;
+      }
+
+      return humidity;
